@@ -1,7 +1,7 @@
 name: Run Selenium on Windows
 
 on:
-  workflow_dispatch:  # Allows manual trigger
+  workflow_dispatch:  # ✅ Allows manual trigger from GitHub Actions UI
 
 jobs:
   run-selenium:
@@ -17,27 +17,9 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Download Chrome & ChromeDriver
-        run: |
-          choco install googlechrome -y
-          $chrome_version = (Get-Item (Get-Command "chrome").Source).VersionInfo.ProductVersion
-          Invoke-WebRequest -Uri "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$chrome_version" -OutFile "chromedriver_version.txt"
-          $driver_version = Get-Content chromedriver_version.txt
-          Invoke-WebRequest -Uri "https://chromedriver.storage.googleapis.com/$driver_version/chromedriver_win32.zip" -OutFile "chromedriver.zip"
-          Expand-Archive -Path chromedriver.zip -DestinationPath .
+      - name: Install Google Chrome
+        run: choco install googlechrome -y  # ✅ Install Chrome manually
 
-      - name: Run Selenium Test
+      - name: Install ChromeDriver
         run: |
-          echo 'import org.openqa.selenium.WebDriver;
-          import org.openqa.selenium.chrome.ChromeDriver;
-          public class GoogleTest {
-              public static void main(String[] args) {
-                  System.setProperty("webdriver.chrome.driver", "chromedriver.exe");
-                  WebDriver driver = new ChromeDriver();
-                  driver.get("https://www.google.com");
-                  System.out.println("Google launched successfully");
-                  driver.quit();
-              }
-          }' > GoogleTest.java
-          javac GoogleTest.java
-          java GoogleTest
+          $chrome_version = (_
