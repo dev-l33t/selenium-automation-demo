@@ -1,36 +1,43 @@
-name: Run Selenium Google Screenshot Test
+name: Run Selenium on Windows
 
-on: workflow_dispatch  # Allows manual trigger from GitHub UI
+on:
+  workflow_dispatch:  # Allows manual trigger
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  run-selenium:
+    runs-on: windows-latest  # ✅ Runs on Windows
 
     steps:
-      - name: Checkout repository
+      - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Setup Java
+      - name: Set up Java
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Install Chrome and ChromeDriver
+      - name: Download Chrome & ChromeDriver
         run: |
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
-          CHROME_VERSION=$(google-chrome --version | awk '{print $3}')
-          curl -sSLo chromedriver.zip https://chromedriver.storage.googleapis.com/${CHROME_VERSION}/chromedriver_linux64.zip
-          unzip chromedriver.zip
-          chmod +x chromedriver
-          sudo mv chromedriver /usr/local/bin/
+          choco install googlechrome -y
+          $chrome_version = (Get-Item (Get-Command "chrome").Source).VersionInfo.ProductVersion
+          Invoke-WebRequest -Uri "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$chrome_version" -OutFile "chromedriver_version.txt"
+          $driver_version = Get-Content chromedriver_version.txt
+          Invoke-WebRequest -Uri "https://chromedriver.storage.googleapis.com/$driver_version/chromedriver_win32.zip" -OutFile "chromedriver.zip"
+          Expand-Archive -Path chromedriver.zip -DestinationPath .
 
       - name: Run Selenium Test
-        run: javac -cp ".:selenium-java-4.8.3.jar" src/test/java/GoogleScreenshotTest.java && java -cp ".:selenium-java-4.8.3.jar" src/test/java/GoogleScreenshotTest
-
-      - name: Upload Screenshot
-        uses: actions/upload-artifact@v3
-        with:
-          name: Google_Screenshot
-          path: screenshot.png
+        run: |
+          echo 'import org.openqa.selenium.WebDriver;
+          import org.openqa.selenium.chrome.ChromeDriver;
+          public class GoogleTest {
+              public static void main(String[] args) {
+                  System.setProperty("webdriver.chrome.driver", "chromedriver.exe");
+                  WebDriver driver = new ChromeDriver();
+                  driver.get("https://www.google.com");
+                  System.out.println("Google launched successfully");
+                  driver.quit();
+              }
+          }' > GoogleTest.java
+          javac GoogleTest.java
+          java GoogleTest
