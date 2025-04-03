@@ -1,31 +1,38 @@
-name: Run Selenium with Maven
+name: Selenium Automation
 
 on:
-  workflow_dispatch:  # ✅ Allows manual trigger from GitHub Actions UI
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '0 0 * * 1'  # Runs every Monday at midnight
 
 jobs:
   run-selenium:
-    runs-on: windows-latest  # ✅ Run on Windows machine
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
+    - name: Set up Java
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'
 
-      - name: Set up Maven
-        run: choco install maven -y  # ✅ Install Maven automatically
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y xvfb
+        wget https://selenium-release.storage.googleapis.com/3.141/selenium-server-standalone-3.141.59.jar
+        wget https://chromedriver.storage.googleapis.com/2.41/chromedriver_linux64.zip
+        unzip chromedriver_linux64.zip
+        sudo mv chromedriver /usr/local/bin/
 
-      - name: Verify Maven Installation
-        run: mvn -version  # ✅ Check Maven is installed correctly
-
-     - name: Install Google Chrome
-  run: choco install googlechrome -y --ignore-checksums
-  # ✅ Install Google Chrome
-
-      - name: Run Selenium Test with Maven
-        run: mvn clean test  # ✅ Run the Selenium test case
+    - name: Run Selenium script
+      run: |
+        xvfb-run --auto-servernum java -Dwebdriver.chrome.driver=/usr/local/bin/chromedriver -jar selenium-server-standalone-3.141.59.jar &
+        sleep 5
+        java -jar path/to/your/selenium-script.jar
+      env:
+        DISPLAY: :99
