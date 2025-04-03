@@ -1,11 +1,11 @@
 name: Run Selenium with Maven
 
 on:
-  workflow_dispatch:  # ✅ Allows manual trigger from GitHub UI
+  workflow_dispatch:  # ✅ Allows manual trigger from GitHub Actions UI
 
 jobs:
   run-selenium:
-    runs-on: windows-latest  # ✅ Runs on Windows
+    runs-on: windows-latest  # ✅ Run on Windows machine
 
     steps:
       - name: Checkout Code
@@ -18,13 +18,13 @@ jobs:
           java-version: '17'
 
       - name: Set up Maven
-        run: choco install maven -y  # ✅ Install Maven on Windows
+        run: choco install maven -y  # ✅ Install Maven automatically
 
       - name: Verify Maven Installation
-        run: mvn -version  # ✅ Check Maven is installed
+        run: mvn -version  # ✅ Check Maven is installed correctly
 
       - name: Install Google Chrome
-        run: choco install googlechrome -y  # ✅ Install Chrome manually
+        run: choco install googlechrome -y  # ✅ Install Google Chrome
 
-      - name: Run Selenium Tests with Maven
-        run: mvn clean test  # ✅ Runs your Selenium tests
+      - name: Run Selenium Test with Maven
+        run: mvn clean test  # ✅ Run the Selenium test case
