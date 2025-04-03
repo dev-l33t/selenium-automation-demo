@@ -23,8 +23,9 @@ jobs:
       - name: Verify Maven Installation
         run: mvn -version  # ✅ Check Maven is installed correctly
 
-      - name: Install Google Chrome
-        run: choco install googlechrome -y  # ✅ Install Google Chrome
+     - name: Install Google Chrome
+  run: choco install googlechrome -y --ignore-checksums
+  # ✅ Install Google Chrome
 
       - name: Run Selenium Test with Maven
         run: mvn clean test  # ✅ Run the Selenium test case
