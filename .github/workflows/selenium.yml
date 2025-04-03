@@ -1,7 +1,7 @@
-name: Run Selenium on Windows
+name: Run Selenium with Maven
 
 on:
-  workflow_dispatch:  # ✅ Allows manual trigger from GitHub Actions UI
+  workflow_dispatch:  # ✅ Allows manual trigger from GitHub UI
 
 jobs:
   run-selenium:
@@ -17,9 +17,14 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Set up Maven
+        run: choco install maven -y  # ✅ Install Maven on Windows
+
+      - name: Verify Maven Installation
+        run: mvn -version  # ✅ Check Maven is installed
+
       - name: Install Google Chrome
         run: choco install googlechrome -y  # ✅ Install Chrome manually
 
-      - name: Install ChromeDriver
-        run: |
-          $chrome_version = (_
+      - name: Run Selenium Tests with Maven
+        run: mvn clean test  # ✅ Runs your Selenium tests
